@@ -1,9 +1,14 @@
+import time
 from pprint import pprint
+
+import pandas as pd
+import pyspark.sql.functions as f
 from pyspark.sql import SparkSession, Window
 from pyspark.sql.functions import month
-import pyspark.sql.functions as f
 
-spark = SparkSession.builder.appName("q2-sql").getOrCreate()
+APP_NAME = "q2-sql"
+
+spark = SparkSession.builder.appName(APP_NAME).getOrCreate()
 
 files = [
     f"hdfs://master:9000/raw_data/yellow_tripdata_2022-{month_id:02d}.parquet"
@@ -16,6 +21,7 @@ zone_lookup_df = spark.read.csv(
     f"hdfs://master:9000/raw_data/taxi+_zone_lookup.csv", header=True
 )
 
+start = time.time()
 # keep the rows with positive tolls_amount
 yellow_tripdata_df = yellow_tripdata_df.filter(f.col("tolls_amount") > 0)
 
@@ -35,5 +41,9 @@ result = result.drop("max_tolls_amount")
 # collect the result and print it
 result = result.collect()
 
-for row in result:
-    pprint(row.asDict())
+end = time.time()
+print(f"Execution took {end - start} seconds.")
+
+result = [r.asDict() for r in result]
+df = pd.DataFrame(result)
+df.to_excel(f"~/results/{APP_NAME}.xlsx")
