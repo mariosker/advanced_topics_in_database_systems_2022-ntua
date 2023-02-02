@@ -22,8 +22,12 @@ zone_lookup_df = spark.read.csv(
 )
 
 start = time.time()
-# keep the rows with positive tolls_amount
-yellow_tripdata_df = yellow_tripdata_df.filter(f.col("tolls_amount") > 0)
+# keep the rows with positive tolls_amount and tpep_pickup_datetime is between 2022-01 and 2022-06
+yellow_tripdata_df = yellow_tripdata_df.filter(
+    (f.col("tolls_amount") > 0)
+    & (yellow_tripdata_df.tpep_pickup_datetime >= "2022-01-01")
+    & (yellow_tripdata_df.tpep_pickup_datetime < "2022-07-01")
+)
 
 # group `tpep_pickup_datetime` of yellow_tripdata_df by month and get the max `tolls_amount` for each month and store it in a new variable `max_tolls_amount`
 w = Window.partitionBy(f.month(yellow_tripdata_df.tpep_pickup_datetime))
@@ -44,6 +48,7 @@ result = result.collect()
 end = time.time()
 print(f"Execution took {end - start} seconds.")
 
-result = [r.asDict() for r in result]
-df = pd.DataFrame(result)
-df.to_excel(f"~/results/{APP_NAME}.xlsx")
+with open(f"{APP_NAME}.txt", "w") as f:
+    f.write(f"Execution took {end - start} seconds.")
+
+pprint(result)

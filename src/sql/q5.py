@@ -21,6 +21,13 @@ zone_lookup_df = spark.read.csv(
 )
 
 start = time.time()
+
+# keep rows where tpep_pickup_datetime is between 2022-01 and 2022-06
+yellow_tripdata_df = yellow_tripdata_df.filter(
+    (yellow_tripdata_df.tpep_pickup_datetime >= "2022-01-01")
+    & (yellow_tripdata_df.tpep_pickup_datetime < "2022-07-01")
+)
+
 # group by month and day of the month and divide the total tip amount by the total fare amount to get the average tip percentage
 yellow_tripdata_df = yellow_tripdata_df.groupBy(
     f.dayofmonth("tpep_pickup_datetime").alias("day_of_month"),
@@ -38,6 +45,13 @@ result = yellow_tripdata_df.collect()
 end = time.time()
 print(f"Execution took {end - start} seconds.")
 
-result = [r.asDict() for r in result]
-df = pd.DataFrame(result)
-df.to_excel(f"~/results/{APP_NAME}.xlsx")
+with open(f"{APP_NAME}.txt", "w") as f:
+    f.write(f"Execution took {end - start} seconds.")
+
+print(result)
+
+# spark-submit --master spark://master:7077 q1.py
+# spark-submit --master spark://master:7077 q2.py &&
+# spark-submit --master spark://master:7077 q3.py &&
+# spark-submit --master spark://master:7077 q4.py &&
+# spark-submit --master spark://master:7077 q5.py &&

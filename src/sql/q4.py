@@ -23,6 +23,13 @@ zone_lookup_df = spark.read.csv(
 )
 
 start = time.time()
+
+# keep rows where tpep_pickup_datetime is between 2022-01 and 2022-06
+yellow_tripdata_df = yellow_tripdata_df.filter(
+    (yellow_tripdata_df.tpep_pickup_datetime >= "2022-01-01")
+    & (yellow_tripdata_df.tpep_pickup_datetime < "2022-07-01")
+)
+
 # Turn datetime into week day and hour of the day
 yellow_tripdata_df = yellow_tripdata_df.withColumn(
     "week_day", f.date_format(f.col("tpep_pickup_datetime"), "EEEE")
@@ -47,6 +54,7 @@ result = yellow_tripdata_df.collect()
 end = time.time()
 print(f"Execution took {end - start} seconds.")
 
-result = [r.asDict() for r in result]
-df = pd.DataFrame(result)
-df.to_excel(f"~/results/{APP_NAME}.xlsx")
+with open(f"{APP_NAME}.txt", "w") as f:
+    f.write(f"Execution took {end - start} seconds.")
+
+pprint(result)

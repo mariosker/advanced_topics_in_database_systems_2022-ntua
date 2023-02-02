@@ -22,6 +22,13 @@ zone_lookup_df = spark.read.csv(f"{HDFS_FOLDER}/taxi+_zone_lookup.csv", header=T
 zone_lookup_rdd = zone_lookup_df.rdd
 
 start = time.time()
+
+# keep rows where tpep_pickup_datetime is between 2022-01 and 2022-06
+yellow_tripdata_df = yellow_tripdata_df.filter(
+    (yellow_tripdata_df.tpep_pickup_datetime >= "2022-01-01")
+    & (yellow_tripdata_df.tpep_pickup_datetime < "2022-07-01")
+)
+
 # Get LocationID for rows that have Zone == "Battery Park"
 battery_park_rows = zone_lookup_df.where(zone_lookup_df.Zone == "Battery Park").select(
     ["LocationID"]
@@ -47,7 +54,7 @@ result = max_tip_row.collect()
 end = time.time()
 print(f"Execution took {end - start} seconds.")
 
+with open(f'{APP_NAME}.txt', 'w') as f:
+    f.write(f"Execution took {end - start} seconds.")
 
-result = [result[0].asDict()]
-df = pd.DataFrame(result)
-df.to_excel(f"~/results/{APP_NAME}.xlsx")
+pprint(result)
