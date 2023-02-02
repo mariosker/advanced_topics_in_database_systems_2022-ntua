@@ -1,10 +1,8 @@
 import time
-from pprint import pprint
 
-import pandas as pd
 import pyspark.sql.functions as f
 from pyspark.sql import SparkSession, Window
-from pyspark.sql.functions import month
+from tabulate import tabulate
 
 APP_NAME = "q5-sql"
 files = [
@@ -17,7 +15,7 @@ spark = SparkSession.builder.appName(APP_NAME).getOrCreate()
 yellow_tripdata_df = spark.read.parquet(*files, mergeSchema=True)
 
 zone_lookup_df = spark.read.csv(
-    f"hdfs://master:9000/raw_data/taxi+_zone_lookup.csv", header=True
+    "hdfs://master:9000/raw_data/taxi+_zone_lookup.csv", header=True
 )
 
 start = time.time()
@@ -43,15 +41,12 @@ yellow_tripdata_df = yellow_tripdata_df.withColumn(
 result = yellow_tripdata_df.collect()
 
 end = time.time()
+
 print(f"Execution took {end - start} seconds.")
-
-with open(f"{APP_NAME}.txt", "w") as f:
-    f.write(f"Execution took {end - start} seconds.")
-
 print(result)
 
-# spark-submit --master spark://master:7077 q1.py
-# spark-submit --master spark://master:7077 q2.py &&
-# spark-submit --master spark://master:7077 q3.py &&
-# spark-submit --master spark://master:7077 q4.py &&
-# spark-submit --master spark://master:7077 q5.py &&
+headers = result[0].asDict().keys()
+md_table = tabulate(result, headers, tablefmt="github")
+with open(f"{APP_NAME}.md", "w") as f:
+    f.write(f"Execution took {end - start} seconds.\n")
+    f.write(f"{md_table}")

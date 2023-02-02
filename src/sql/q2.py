@@ -1,10 +1,8 @@
 import time
-from pprint import pprint
 
-import pandas as pd
 import pyspark.sql.functions as f
 from pyspark.sql import SparkSession, Window
-from pyspark.sql.functions import month
+from tabulate import tabulate
 
 APP_NAME = "q2-sql"
 
@@ -18,7 +16,7 @@ files = [
 yellow_tripdata_df = spark.read.parquet(*files, mergeSchema=True)
 
 zone_lookup_df = spark.read.csv(
-    f"hdfs://master:9000/raw_data/taxi+_zone_lookup.csv", header=True
+    "hdfs://master:9000/raw_data/taxi+_zone_lookup.csv", header=True
 )
 
 start = time.time()
@@ -44,11 +42,13 @@ result = result.drop("max_tolls_amount")
 
 # collect the result and print it
 result = result.collect()
-
 end = time.time()
+
 print(f"Execution took {end - start} seconds.")
+print(result)
 
-with open(f"{APP_NAME}.txt", "w") as f:
-    f.write(f"Execution took {end - start} seconds.")
-
-pprint(result)
+headers = result[0].asDict().keys()
+md_table = tabulate(result, headers, tablefmt="github")
+with open(f"{APP_NAME}.md", "w") as f:
+    f.write(f"Execution took {end - start} seconds.\n")
+    f.write(f"{md_table}")

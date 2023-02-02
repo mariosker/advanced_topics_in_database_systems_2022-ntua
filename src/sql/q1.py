@@ -1,9 +1,8 @@
 import time
-from pprint import pprint
 
-import pandas as pd
 import pyspark.sql.functions as f
 from pyspark.sql import SparkSession
+from tabulate import tabulate
 
 APP_NAME = "q1_sql"
 HDFS_FOLDER = "hdfs://master:9000/raw_data"
@@ -50,11 +49,13 @@ max_tip_row = selected_trips.join(
 )
 # show max_tip_row in a vertical format
 result = max_tip_row.collect()
-
 end = time.time()
+
 print(f"Execution took {end - start} seconds.")
+print(result)
 
-with open(f'{APP_NAME}.txt', 'w') as f:
-    f.write(f"Execution took {end - start} seconds.")
-
-pprint(result)
+headers = result[0].asDict().keys()
+md_table = tabulate(result, headers, tablefmt="github")
+with open(f"{APP_NAME}.md", "w") as f:
+    f.write(f"Execution took {end - start} seconds.\n")
+    f.write(f"{md_table}")
