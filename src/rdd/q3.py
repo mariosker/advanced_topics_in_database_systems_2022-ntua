@@ -1,9 +1,4 @@
-# Να βρεθεί, ανά 15 ημέρες, ο μέσος όρος της απόστασης και του κόστους για όλες τις
-# διαδρομές με σημείο αναχώρησης διαφορετικό από το σημείο άφιξης.
-
-import time
-from pprint import pprint
-
+from datetime import datetime
 from pyspark.sql import SparkSession
 
 APP_NAME = "q3_rdd"
@@ -17,14 +12,17 @@ spark = SparkSession.builder.appName(APP_NAME).getOrCreate()
 yellow_tripdata_rdd = spark.read.parquet(*files, mergeSchema=True).rdd
 
 zone_lookup_rdd = spark.read.csv(
-    f"hdfs://master:9000/raw_data/taxi+_zone_lookup.csv", header=True
+    "hdfs://master:9000/raw_data/taxi+_zone_lookup.csv", header=True
 ).rdd
 
-# min_date = yellow_tripdata_rdd.min(lambda x: x.tpep_pickup_datetime)
-
-# remove trips where `PUlocationID` == `DOlocationID`
+# remove trips where `PULocationID` == `DOLocationID`
+# and tpep_pickup_datetime is between 2022-01 and 2022-06
 yellow_tripdata_rdd = yellow_tripdata_rdd.filter(
-    lambda x: x.PULocationID != x.DOLocationID
+    lambda x: (
+        x.PULocationID != x.DOLocationID
+        and x.tpep_pickup_datetime >= datetime(2022, 1, 1)
+        and x.tpep_pickup_datetime < datetime(2022, 7, 1)
+    )
 )
 
 # get min date from `tpep_pickup_datetime`
@@ -52,4 +50,3 @@ yellow_tripdata_rdd_final = yellow_tripdata_rdd.groupBy(group_by_15_day_window).
     extract_date_range
 )
 print(yellow_tripdata_rdd_final.first())
-# 2001-08-23

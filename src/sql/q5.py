@@ -26,7 +26,8 @@ yellow_tripdata_df = yellow_tripdata_df.filter(
     & (yellow_tripdata_df.tpep_pickup_datetime < "2022-07-01")
 )
 
-# group by month and day of the month and divide the total tip amount by the total fare amount to get the average tip percentage
+# group by month and day of the month and divide the total tip amount
+# by the total fare amount to get the average tip percentage
 yellow_tripdata_df = yellow_tripdata_df.groupBy(
     f.dayofmonth("tpep_pickup_datetime").alias("day_of_month"),
     f.month("tpep_pickup_datetime").alias("month"),

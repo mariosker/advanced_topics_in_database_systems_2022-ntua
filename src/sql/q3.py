@@ -19,14 +19,17 @@ zone_lookup_df = spark.read.csv(
 )
 
 start = time.time()
-# filter yellow_tripdata_df to keep only the rows that have `PUlocationID` != `DOlocationID` and tpep_pickup_datetime is between 2022-01 and 2022-06
+# filter yellow_tripdata_df to keep only the rows
+# that have `PUlocationID` != `DOlocationID`
+# and tpep_pickup_datetime is between 2022-01 and 2022-06
 yellow_tripdata_df = yellow_tripdata_df.filter(
-    (f.col("PUlocationID") != f.col("DOlocationID"))
+    (f.col("PULocationID") != f.col("DOLocationID"))
     & (yellow_tripdata_df.tpep_pickup_datetime >= "2022-01-01")
     & (yellow_tripdata_df.tpep_pickup_datetime < "2022-07-01")
 )
 
-# group yellow_tripdata_df by `tpep_pickup_datetime` every 15 days and compute the average `trip_distance` and `total_amount`
+# group yellow_tripdata_df by `tpep_pickup_datetime` every 15 days
+# and compute the average `trip_distance` and `total_amount`
 yellow_tripdata_df = yellow_tripdata_df.groupBy(
     f.window("tpep_pickup_datetime", "15 days")
 ).agg(f.avg("trip_distance"), f.avg("total_amount"))
