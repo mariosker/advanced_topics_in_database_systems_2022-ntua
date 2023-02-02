@@ -15,10 +15,7 @@ files = [
 ]
 
 yellow_tripdata_df = spark.read.parquet(*files, mergeSchema=True)
-yellow_tripdata_rdd = yellow_tripdata_df.rdd
-
 zone_lookup_df = spark.read.csv(f"{HDFS_FOLDER}/taxi+_zone_lookup.csv", header=True)
-zone_lookup_rdd = zone_lookup_df.rdd
 
 start = time.time()
 

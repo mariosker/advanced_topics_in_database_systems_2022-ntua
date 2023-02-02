@@ -15,7 +15,6 @@ files = [
 spark = SparkSession.builder.appName(APP_NAME).getOrCreate()
 
 yellow_tripdata_df = spark.read.parquet(*files, mergeSchema=True)
-
 zone_lookup_df = spark.read.csv(
     "hdfs://master:9000/raw_data/taxi+_zone_lookup.csv", header=True
 )
