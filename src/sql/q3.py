@@ -41,6 +41,9 @@ yellow_tripdata_df = yellow_tripdata_df.select(
     f.col("avg(total_amount)").alias("avg_total_amount"),
 )
 
+# order yellow_tripdata_df by `start` and `end`
+yellow_tripdata_df = yellow_tripdata_df.orderBy("start")
+
 # collect the data of yellow_tripdata_df
 result = yellow_tripdata_df.collect()
 
