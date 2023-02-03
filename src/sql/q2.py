@@ -43,6 +43,9 @@ result = yellow_tripdata_df.where(f.col("tolls_amount") == f.col("max_tolls_amou
 # drop the column `max_tolls_amount`
 result = result.drop("max_tolls_amount")
 
+# sort the result by `tpep_pickup_datetime` in ascending order
+result = result.sort("tpep_pickup_datetime")
+
 # collect the result and print it
 result = result.collect()
 end = time.time()
