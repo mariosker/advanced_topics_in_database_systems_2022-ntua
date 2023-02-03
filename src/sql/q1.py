@@ -38,14 +38,15 @@ selected_trips = yellow_tripdata_df_march.join(
     battery_park_rows,
     yellow_tripdata_df_march.PULocationID == battery_park_rows.LocationID,
 ).select(yellow_tripdata_df_march["*"])
-# get row with max `tip_amount` from selected_trips
-max_tip = selected_trips.agg(f.max(selected_trips.tip_amount))
-# join selected_trips with max_tip to get the row with max `tip_amount`
-max_tip_row = selected_trips.join(
-    max_tip, selected_trips.tip_amount == max_tip["max(tip_amount)"]
-)
+
+# Get the max tip_amount from selected_trips
+max_tip = selected_trips.agg({"tip_amount": "max"}).collect()[0][0]
+
+# find selected_trips with max_tip
+max_tip_rows = selected_trips.where(selected_trips.tip_amount == max_tip)
+
 # show max_tip_row in a vertical format
-result = max_tip_row.collect()
+result = max_tip_rows.collect()
 end = time.time()
 
 print(f"Execution took {end - start} seconds.")
